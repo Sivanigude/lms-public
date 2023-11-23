@@ -6,9 +6,9 @@ pipeline {
 
     environment {
 
-    DOCKERHUB_CREDENTIALS = credentials('dockerusermubeen')
-     registry = "mubeen507/backend-lms"
-        registryCredential = 'dockerusermubeen'
+    DOCKERHUB_CREDENTIALS = credentials('docker')
+     registry = "sivanigude/backend-lms"
+        registryCredential = 'docker'
        
     }
 
@@ -17,7 +17,7 @@ pipeline {
         
         stage('Building the docker image') {
             steps {
-                sh 'cd api && docker build -t mubeen507/backend-lms .'
+                sh 'cd api && docker build -t sivanigude/backend-lms .'
             }
         }
         stage('Logging into dockerhub account') {
@@ -27,24 +27,24 @@ pipeline {
         }
         stage('pushing the docker image into dockerhub') {
             steps {
-                  sh 'docker push mubeen507/backend-lms'
+                  sh 'docker push sivanigude/backend-lms'
             }
         }
         stage('Remove old docker images') {
              steps {
-                 sh 'docker rmi -f mubeen507/backend-lms'
+                 sh 'docker rmi -f sivanigude/backend-lms'
             }
         }
          stage('creating database container') {
              steps {
-                 sh 'docker container rm --force lmsdb'
-                 sh 'docker run -d -p 5432:5432 --network lmsnetwork -e  POSTGRES_PASSWORD=password --name lmsdb postgres'
+                 sh 'docker container rm --force database'
+                 sh 'docker run -d -p 5432:5432 --network lmsnetwork -e  POSTGRES_PASSWORD=password --name database postgres'
             }
         }
          stage('Running the docker container') {
             steps {
                   sh 'docker container rm --force backend'
-                  sh 'docker run -d -p 8080:8080 --network lmsnetwork -e DATABASE_URL=postgresql://postgres:password@lmsdb:5432/postgres --name backend -e PORT=8080 -e MODE=local  mubeen507/backend-lms'
+                  sh 'docker run -d -p 8080:8080 --network lmsnetwork -e DATABASE_URL=postgresql://postgres:password@database:5432/postgres --name backend -e PORT=8080 -e MODE=local  sivanigude/backend-lms'
             }
         }
     }
